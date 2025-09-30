@@ -4,7 +4,51 @@
     "title": "Pastis API",
     "version": "1.0.0"
   },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
   "paths": {
+    "/login": {
+      "post": {
+        "summary": "Login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string", "example": "admin" },
+                  "password": { "type": "string", "example": "admin" }
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string", "description": "JWT TOKEN" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/users": {
       "post": {
         "summary": "Create user",
@@ -15,7 +59,11 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "pseudo": { "type": "string", "minLength": 1, "maxLength": 100 }
+                  "pseudo": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
                 },
                 "required": ["pseudo"]
               }
@@ -45,6 +93,11 @@
     "/recipes": {
       "post": {
         "summary": "Create recipe",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -59,9 +112,19 @@
                     "items": {
                       "type": "object",
                       "properties": {
-                        "ingredient": { "type": "string", "enum": ["apple", "carrot"] },
-                        "amount": { "type": "number", "minimum": 0, "exclusiveMinimum": true },
-                        "unit": { "type": "string", "enum": ["kg", "cs", "cc", "L", "mL"] }
+                        "ingredient": {
+                          "type": "string",
+                          "enum": ["apple", "carrot"]
+                        },
+                        "amount": {
+                          "type": "number",
+                          "minimum": 0,
+                          "exclusiveMinimum": true
+                        },
+                        "unit": {
+                          "type": "string",
+                          "enum": ["kg", "cs", "cc", "L", "mL"]
+                        }
                       },
                       "required": ["ingredient", "amount", "unit"]
                     }
@@ -72,7 +135,11 @@
                       "type": "object",
                       "properties": {
                         "number": { "type": "integer", "minimum": 1 },
-                        "instructions": { "type": "string", "minLength": 1, "maxLength": 1000 }
+                        "instructions": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1000
+                        }
                       },
                       "required": ["number", "instructions"]
                     }
@@ -89,9 +156,21 @@
           },
           "400": { "description": "Bad Request" }
         }
+      },
+      "get": {
+        "summary": "Get recipes",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recipes"
+          },
+          "400": { "description": "Bad Request" }
+        }
       }
     }
   }
 }
-
-

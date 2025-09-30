@@ -19,8 +19,16 @@ export class UserRepository implements UserRepositoryInterface {
     return randomUUID();
   }
 
-  find(pseudo: string) {
-    const foundUser =  users.find((user) => user.pseudo === pseudo);
+  findByPseudo(pseudo: string) {
+    const foundUser = users.find((user) => user.pseudo === pseudo);
+    if (!foundUser) {
+      return null;
+    }
+    return User.create(foundUser.pseudo, foundUser.id, true);
+  }
+
+  findById(id: string) {
+    const foundUser = users.find((user) => user.id === id);
     if (!foundUser) {
       return null;
     }
