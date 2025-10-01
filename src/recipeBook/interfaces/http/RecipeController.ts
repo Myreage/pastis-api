@@ -38,7 +38,7 @@ export class RecipeController {
 
   async findRecipes(req: Request, res: Response) {
     try {
-      const recipes = findRecipes();
+      const recipes = findRecipes({});
 
       res.status(200).json(
         recipes.map((recipe) => ({
