@@ -66,23 +66,25 @@ export class RecipeRepository implements RecipeRepositoryInterface {
     return recipe;
   }
 
-  findAll() {
-    return recipes.map((recipe) =>
-      Recipe.create({
-        authorId: recipe.authorId,
-        id: recipe.id,
-        ingredientsList: recipe.ingredients.map((ingredientLine) => ({
-          amount: ingredientLine.quantity,
-          ingredient: ingredientLine.ingredient,
-          unit: ingredientLine.unit,
-        })),
-        name: recipe.name,
-        steps: recipe.steps.map((step) => ({
-          instructions: step.instructions,
-          number: step.number,
-        })),
-      }),
-    );
+  findAll({ authorId }: { authorId?: string }) {
+    return recipes
+      .filter((recipe) => (authorId ? recipe.authorId === authorId : true))
+      .map((recipe) =>
+        Recipe.create({
+          authorId: recipe.authorId,
+          id: recipe.id,
+          ingredientsList: recipe.ingredients.map((ingredientLine) => ({
+            amount: ingredientLine.quantity,
+            ingredient: ingredientLine.ingredient,
+            unit: ingredientLine.unit,
+          })),
+          name: recipe.name,
+          steps: recipe.steps.map((step) => ({
+            instructions: step.instructions,
+            number: step.number,
+          })),
+        }),
+      );
   }
 
   findByAuthor(authorId: string) {

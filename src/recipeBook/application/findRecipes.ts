@@ -1,7 +1,11 @@
 import { RecipeRepository } from "../infrastructure/persistence/RecipeRepository";
 
-export const findRecipes = () => {
+type Args = {
+  authorId?: string;
+};
+
+export const findRecipes = (args: Args) => {
   const recipeRepository = new RecipeRepository();
 
-  return recipeRepository.findAll();
+  return recipeRepository.findAll(args);
 };
