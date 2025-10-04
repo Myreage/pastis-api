@@ -1,60 +1,81 @@
-import express, { NextFunction, Request, Response } from "express";
-import { UserController } from "./identity/interfaces/http/UserController";
-import { RecipeController } from "./recipeBook/interfaces/http/RecipeController";
-import swaggerUi from "swagger-ui-express";
-import openapi from "./openapi.json";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import express from "express";
+import * as z from "zod";
+import {
+  createRecipe,
+  deleteRecipe,
+  findRecipe,
+  findRecipes,
+  updateRecipe,
+} from "./application/recipe";
 
 const app = express();
 const port = 3000;
-
-// Middleware pour parser le JSON
 app.use(express.json());
 
-// Controllers
-const userController = new UserController();
-const recipeController = new RecipeController();
-
-// Swagger UI
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(openapi));
-
-// Login
-app.post("/login", (req, res) => {
-  const { username, password } = req.body;
-
-  if (username === "admin" && password === "admin") {
-    const token = jwt.sign({ username }, "SUPERSECRET", { expiresIn: "1h" });
-    return res.json({ token });
-  }
+app.get("/recipes", (_req, res) => {
+  const recipes = findRecipes();
+  res.status(200).json(recipes);
 });
 
-// Auth middleware
-const auth = (
-  req: Request & { user?: JwtPayload | string },
-  res: Response,
-  next: NextFunction,
-) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+app.get("/recipes/:id", (req, res) => {
+  const recipe = findRecipe(req.params.id);
+  if (!recipe) {
+    res.sendStatus(404);
+    return;
+  }
+  res.status(200).json(recipe);
+});
 
-  if (!token) return res.sendStatus(401);
+const RecipeBody = z.object({
+  name: z.string(),
+  description: z.string(),
+  timeInMinutes: z.number(),
+  difficulty: z.number(),
+  tags: z.array(z.string()),
+  ingredients: z.array(
+    z.object({
+      name: z.enum(["apple", "pasta"]),
+      quantity: z.number(),
+      unit: z.enum(["kg", "g"]),
+    }),
+  ),
+  steps: z.array(
+    z.object({
+      number: z.number(),
+      description: z.string(),
+    }),
+  ),
+});
 
-  jwt.verify(token, "SUPERSECRET", (err, user) => {
-    if (err || !user) return res.sendStatus(403);
-    req.user = user;
-    next();
-  });
-};
+app.post("/recipes", (req, res) => {
+  console.log(req.body);
+  const bodyParsingResult = RecipeBody.safeParse(req.body);
+  if (!bodyParsingResult.success) {
+    res.status(400).json(z.treeifyError(bodyParsingResult.error));
+    return;
+  }
+  const createdRecipe = createRecipe(bodyParsingResult.data);
+  if ("error" in createdRecipe) {
+    res.status(400).json(createdRecipe);
+    return;
+  }
+  res.status(201).json(createdRecipe);
+});
 
-// User routes
-app.post("/users", (req, res) => userController.createUser(req, res));
+app.put("/recipes/:id", (req, res) => {
+  const updatedRecipe = updateRecipe({ ...req.body, id: req.params.id });
+  if ("error" in updatedRecipe) {
+    res.status(400).json(updatedRecipe);
+    return;
+  }
+  res.status(200).json(updatedRecipe);
+});
 
-// Recipe routes
-app.post("/recipes", auth, (req, res) =>
-  recipeController.createRecipe(req, res),
-);
-app.get("/recipes", auth, (req, res) => recipeController.findRecipes(req, res));
+app.delete("/recipes/:id", (req, res) => {
+  deleteRecipe(req.params.id);
+  res.sendStatus(204);
+});
 
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  console.log(`Pastis Recipe listening on port ${port}`);
 });

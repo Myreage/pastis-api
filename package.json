@@ -1,22 +1,23 @@
 {
-  "name": "pastis-api",
+  "name": "pastis-recipe-api",
   "version": "1.0.0",
-  "license": "MIT",
+  "description": "",
+  "main": "index.ts",
   "scripts": {
     "dev": "ts-node src/index.ts"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.14.0",
   "dependencies": {
-    "express": "5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "swagger-ui-express": "5.0.1",
-    "zod": "3.23.8"
+    "@types/express": "^5.0.3",
+    "express": "^5.1.0",
+    "zod": "^4.1.11"
   },
   "devDependencies": {
-    "@types/express": "5.0.3",
-    "@types/node": "22.15.32",
-    "@types/swagger-ui-express": "4.1.7",
-	"@types/jsonwebtoken": "9.0.10",
-    "ts-node": "10.9.2",
-    "typescript": "5.8.2"
+    "@types/node": "^24.6.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
