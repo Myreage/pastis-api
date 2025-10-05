@@ -1,5 +1,6 @@
 import express from "express";
 import * as z from "zod";
+import cors from "cors";
 import {
   createRecipe,
   deleteRecipe,
@@ -11,6 +12,7 @@ import {
 const app = express();
 const port = 3000;
 app.use(express.json());
+app.use(cors());
 
 app.get("/recipes", (_req, res) => {
   const recipes = findRecipes();
